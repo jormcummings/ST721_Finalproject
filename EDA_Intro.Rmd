@@ -1,0 +1,57 @@
+---
+title: "EDA"
+output: html_document
+date: "2025-10-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# ST721 Final Project 
+
+#### Annie DiFrank, Jordan Cummings, Timothy Boakye
+
+## 1. Project Introduction
+
+**Our project goal is to perform cross-population polygenic risk prediction for body mass index (BMI), a common trait used as a human health indicator.** Herein, we explore some of the inherent challenges of cross-population PRS prediction.
+
+Genetic risk prediction involves estimating an individual's probabilty of developing a trait based on their genetic variants. As complex traits, such as BMI, are highly polygenic (i.e. many contributing loci), often polygenic risk scores (PRS) are created, which combine information from multiple loci. In PRS, for an individual allele, both the risk allele count of the SNP and the estimated effect size of the risk allele contributes. PRS can enhance the predictive power by using a large number of SNPs to understand the genetic architecture of complex traits.
+
+Cross-population prediction is a challenge in statistical genetics due to differences in allele frequencies, linkage disequilibrium (LD) within populations, and allelic effect sizes. Most current PRS models are trained on data from European-ancestry populations (predominantly white/non-hispanic), hindering their performance in other ancestral groups.
+
+We will obtain available GWAS data from both European and non-European populations, and additionally combine these datasets into one, to build 3 sets of PRS for BMI using SNP weights from each. We will then apply several PRS approaches and evaluate the predictive performance of each.
+
+## 2. Exploratory Data Analysis 
+
+For base data (discovery data) we have obtained publicly available GWAS information from a European population and non-European population. These consist of summary statistics from GWAS on the phenotype of interest, so that we can provide marginal effect-size estimates for each SNP.
+
+Our target data is from Chapter 10 of [\"Introduction to Statistical Genetic Analysis\"](https://www.intro-statistical-genetics.com/data-code) by Mills, Barban, and Tropf. This consists of individual-level data of genotypes.
+
+Our reference data is from the 1000 Genome database, whereas genotypes are available and can be used to estimate SNP LD/correlation matrices.
+
+### 2a. Perform QC for base data: European Ancestry 
+
+Check SNP heritability: as a rule of thumb, we will only perform PRS analysis if h^2^~snp~ \>0.05
+
+Genome build information:
+
+Standard GWAS QC (Genotyping rate, HWE, MAF, sample missingness, sex check, pop structure)
+
+### 2b. Perform QC for base data: Non-European Ancestry 
+
+### 2c. Perform QC for target data 
+
+Standard GWAS QC
+
+Genome build information:
+
+Ensure both base and target SNPs were genotyped in reference to the same strand
+
+Ensure the 'effect allele' and 'non-effect allele' are consistent between base and target set
+
+Remove SNPs that are unsure of whether the effect and non-effect alleles are aligned, or whether the DNA strand is flipped
+
+Check sample overlap and relatedness between base and target sets
+
+Retain SNPs common between base and target data
