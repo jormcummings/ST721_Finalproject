@@ -1,0 +1,107 @@
+## Here is my R code I used to explore the data set a bit 
+---
+title: "ST721_EDA"
+author: "Jordan Cummings"
+date: "2025-10-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## EDA for the ST 721 Project - 1A PRS BMI 
+
+```{r}
+# load the packages we will be using 
+
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(data.table)
+```
+
+```{r}
+# Loading files and correct the column names for analysis 
+
+# Load phenotypes, treating blanks as NA
+BMI <- fread("~/Desktop/ST 721/Datasets/data_chapter10/BMI_pheno.txt", header=FALSE, sep="\t", na.strings = c("", "NA"))
+obesity <- fread("~/Desktop/ST 721/Datasets/data_chapter10/Obesity_pheno.txt", header=FALSE, sep=" ", na.strings = c("", "NA"))
+
+# Remove fully blank columns
+BMI <- BMI[, colSums(!is.na(BMI)) > 0, with=FALSE]
+obesity <- obesity[, colSums(!is.na(obesity)) > 0, with=FALSE]
+
+# Assign proper column names
+colnames(BMI) <- c("FID","IID","BMI")
+colnames(obesity) <- c("FID","IID","obesity")
+
+# Merge BMI and obesity
+data <- BMI %>%
+  left_join(obesity, by=c("FID","IID"))
+
+# Check the result
+head(data)
+```
+
+```{r}
+# Check missing values
+
+summary(data)
+sapply(data, function(x) sum(is.na(x)))
+```
+
+```{r}
+# Check the distribution of BMI
+
+ggplot(data, aes(x=BMI)) +
+  geom_histogram(bins=50, fill="skyblue", color="black") +
+  ggtitle("BMI distribution") +
+  xlab("BMI") +
+  ylab("Number of individuals")
+```
+
+```{r}
+# Check the distribution of obesity
+
+ggplot(data, aes(x = factor(obesity))) +
+  geom_bar(fill = "plum") +
+  ggtitle("Obesity distribution") +
+  xlab("Obesity status (0 = non-obese, 1 = obese)") +
+  ylab("Count")
+```
+
+```{r}
+# BMI by obesity status
+
+ggplot(data, aes(x=factor(obesity), y=BMI)) +
+  geom_boxplot(fill="lightgreen") +
+  xlab("Obesity status") +
+  ylab("BMI") +
+  ggtitle("BMI by obesity status")
+```
+
+```{r}
+# PCA (to vizualize)
+
+# Load in the pca.eigenvec file
+pca_file <- "~/Desktop/ST 721/Datasets/data_chapter10/pca.eigenvec"
+
+# read it in as text
+pca <- fread(pca_file, header=FALSE)
+  
+# PLINK PCA .eigenvec files: first 2 columns are FID/IID, rest are PCs
+colnames(pca)[1:2] <- c("FID","IID")
+colnames(pca)[3:4] <- c("PC1","PC2")  # visualize first 2 PCs
+  
+# Merge with phenotype data
+data_pca <- data %>% left_join(pca[,1:4], by=c("FID","IID"))
+  
+# Check first few rows
+head(data_pca)
+  
+# Plot PCA
+ggplot(data_pca, aes(x=PC1, y=PC2)) +
+  geom_point(alpha=0.6) +
+  ggtitle("Population structure (PCA)")
+```
